@@ -11,14 +11,14 @@ class Jaslice:
 	
 	def __init__(self):
 		try:
-			f = open("state.pkl", "rb")
+			f = open("/tmp/state.pkl", "rb")
 			self.state = pickle.load(f)
 			f.close()
 		except:
 			self.state = {'power': False}
 		
 	def close(self):
-		f = open("state.pkl", "wb")
+		f = open("/tmp/state.pkl", "wb")
 		pickle.dump(self.state, f)
 		f.close()
 

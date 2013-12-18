@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 	def __init__(self, request, ca, s):
 		self.jaslice = actions.Jaslice()
-		self.env = Environment(loader=FileSystemLoader('templates'))
+		self.env = Environment(loader=FileSystemLoader('/home/domen/jaslice-webserver/templates'))
 		SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, ca, s)
 	
 	def do_GET(self):
