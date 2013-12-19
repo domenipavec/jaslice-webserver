@@ -49,10 +49,10 @@ class Jaslice:
 		self.state['power'] = False
 	
 	def fireOn(self, parameters):
-		self.state['fires'][parameters[0]]['power'] = True
+		self.state['fires'][int(parameters[0])]['power'] = True
 
 	def fireOff(self, parameters):
-		self.state['fires'][parameters[0]]['power'] = False
+		self.state['fires'][int(parameters[0])]['power'] = False
 
 	def fireSpeed(self, parameters):
 		pass
