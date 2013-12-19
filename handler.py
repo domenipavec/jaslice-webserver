@@ -9,9 +9,10 @@ import SimpleHTTPServer
 import actions
 from jinja2 import Environment, FileSystemLoader
 
+jaslice = actions.Jaslice()
+
 class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 	def __init__(self, request, ca, s):
-		self.jaslice = actions.Jaslice()
 		self.env = Environment(loader=FileSystemLoader('/home/domen/jaslice-webserver/templates'))
 		SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, ca, s)
 	
@@ -30,11 +31,10 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 			self.send_header("Location", referer)
 		else:
 			template = self.env.get_template("index.html")
-			self.wfile.write(template.render(self.jaslice.getState()).encode('utf-8'))
-		self.jaslice.close()
+			self.wfile.write(template.render(jaslice.getState()).encode('utf-8'))
 
 	def handleAction(self, action, parameters):
 		try:
-			self.jaslice.act(action, parameters)
+			jaslice.act(action, parameters)
 		except:
 			print "Action does not exist."

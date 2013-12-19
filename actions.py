@@ -10,18 +10,8 @@ import pickle
 class Jaslice:
 	
 	def __init__(self):
-		try:
-			f = open("/tmp/state.pkl", "rb")
-			self.state = pickle.load(f)
-			f.close()
-		except:
-			self.state = {'power': False}
+		self.state = {'power': False}
 		
-	def close(self):
-		f = open("/tmp/state.pkl", "wb")
-		pickle.dump(self.state, f)
-		f.close()
-
 	def getState(self):
 		return self.state
 

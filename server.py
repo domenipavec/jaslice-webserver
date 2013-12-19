@@ -11,18 +11,12 @@ import handler
 import os, sys
 from daemon import Daemon
 
+PORT = 80
+
 class jasliceServerDaemon(Daemon):
 	def run(self):
 		try:
-			os.remove("/tmp/state.pkl")
-		except:
-			pass
-
-		PORT = 80
-
-		try:
 			httpd = SocketServer.TCPServer(("", PORT), handler.Handler)
-
 			print "serving at port", PORT
 			httpd.serve_forever()
 		except:
