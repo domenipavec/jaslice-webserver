@@ -13,10 +13,14 @@
 	{% if power %}
 		<p>Power: <a href="/act/turn-off">UGASNI</a></p>
 		<div>
-			<h2>Ogenj 1</h2>
-			
-			<h2>Ogenj 2</h2>
-			
+			{% for fire in fires %}
+				<h2>Ogenj {{ loop.index + 1 }}</h2>
+				{% if fire['power'] %}
+					<p><a href="/act/fire-off/{{ loop.index }}">UGASNI</a></p>
+				{% else %}
+					<p><a href="/act/fire-on/{{ loop.index }}">PRIŽGI</a></p>
+				{% endif %}
+			{% endfor %}
 			<h2>Utrinek</h2>
 			
 			<h2>Nebo</h2>
