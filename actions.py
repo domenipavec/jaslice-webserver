@@ -41,7 +41,8 @@ class Jaslice:
 			'fire-light': self.fireLight,
 			'nebo-mode': self.neboMode,
 			'nebo-speed': self.neboSpeed,
-			'nebo-other': self.neboOther
+			'nebo-other': self.neboOther,
+			'utrinek': self.utrinek
 		}
 
 		self.state = {}
@@ -112,3 +113,7 @@ class Jaslice:
 		self.state['nebo']['other'][oid] = int(parameters['other'][0])
 		if USE_SMBUS:
 			self.bus.write_byte_data(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
+
+	def utrinek(self, parameters):
+		if USE_SMBUS:
+			self.bus.write_byte(0x40, 0)
