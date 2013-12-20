@@ -42,8 +42,8 @@ class Jaslice:
 		}
 
 		self.state = {}
-		self.state['fires'] = [{'address': 60, 'power': False, 'speed': 128, 'color': 128, 'light': 255},
-			{'address': 61, 'power': False, 'speed': 128, 'color': 128, 'light': 255}]
+		self.state['fires'] = [{'address': 0x60, 'power': False, 'speed': 128, 'color': 128, 'light': 255},
+			{'address': 0x61, 'power': False, 'speed': 128, 'color': 128, 'light': 255}]
 		self.turnOff(None)
 		
 	def getState(self):
@@ -63,16 +63,31 @@ class Jaslice:
 		self.state['power'] = False
 	
 	def fireOn(self, parameters):
-		self.state['fires'][int(parameters['id'][0])]['power'] = True
+		fid = int(parameters['id'][0])
+		self.state['fires'][fid]['power'] = True
+		if USE_SMBUS:
+			self.bus.write_byte(self.state['fires'][fid]['address'], 1)
 
 	def fireOff(self, parameters):
-		self.state['fires'][int(parameters['id'][0])]['power'] = False
+		fid = int(parameters['id'][0])
+		self.state['fires'][fid]['power'] = False
+		if USE_SMBUS:
+			self.bus.write_byte(self.state['fires'][fid]['address'], 0)
 
 	def fireSpeed(self, parameters):
-		pass
+		fid = int(parameters['id'][0])
+		self.state['fires'][fid]['speed'] = int(parameters['speed'][0])
+		if USE_SMBUS:
+			self.bus.write_byte_data(self.state['fires'][fid]['address'], 4, self.state['fires'][fid]['speed'])
 
 	def fireLight(self, parameters):
-		pass
+		fid = int(parameters['id'][0])
+		self.state['fires'][fid]['light'] = int(parameters['light'][0])
+		if USE_SMBUS:
+			self.bus.write_byte_data(self.state['fires'][fid]['address'], 3, self.state['fires'][fid]['light'])
 
 	def fireColor(self, parameters):
-		pass
+		fid = int(parameters['id'][0])
+		self.state['fires'][fid]['color'] = int(parameters['color'][0])
+		if USE_SMBUS:
+			self.bus.write_byte_data(self.state['fires'][fid]['address'], 2, self.state['fires'][fid]['color'])
