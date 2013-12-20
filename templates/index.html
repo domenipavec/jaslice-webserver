@@ -1,5 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
 <head>
@@ -16,9 +15,10 @@
 			{% for fire in fires %}
 				<h2>Ogenj {{ loop.index }}</h2>
 				{% if fire['power'] %}
-					<p><a href="/act/fire-off/{{ loop.index0 }}">UGASNI</a></p>
+					<p> <input type="number" name="quantity" min="0" max="255" value="128" /></p>
+					<p><a href="/act/fire-off?id={{ loop.index0 }}">UGASNI</a></p>
 				{% else %}
-					<p><a href="/act/fire-on/{{ loop.index0 }}">PRIŽGI</a></p>
+					<p><a href="/act/fire-on?id={{ loop.index0 }}">PRIŽGI</a></p>
 				{% endif %}
 			{% endfor %}
 			<h2>Utrinek</h2>
