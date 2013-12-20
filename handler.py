@@ -36,9 +36,16 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 			else:
 				referer = "/"
 			self.send_header("Location", referer)
+			self.send_header("Content-length", len("Action executed"))
+			self.end_headers()
 		else:
 			template = self.env.get_template("index.html")
-			self.wfile.write(template.render(jaslice.getState()).encode('utf-8'))
+			text = template.render(jaslice.getState()).encode('utf-8')
+			self.send_response(200)
+			self.send_header("Content-type", "text/html")
+			self.send_header("Content-length", len(text))
+			self.end_headers()
+			self.wfile.write(text)
 
 	def handleAction(self, action, parameters):
 		try:
