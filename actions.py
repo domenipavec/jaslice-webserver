@@ -38,12 +38,17 @@ class Jaslice:
 			'fire-off': self.fireOff,
 			'fire-speed': self.fireSpeed,
 			'fire-color': self.fireColor,
-			'fire-light': self.fireLight
+			'fire-light': self.fireLight,
+			'nebo-mode': self.neboMode,
+			'nebo-speed': self.neboSpeed,
+			'nebo-other': self.neboOther
 		}
 
 		self.state = {}
 		self.state['fires'] = [{'address': 0x60, 'power': False, 'speed': 128, 'color': 128, 'light': 255},
 			{'address': 0x61, 'power': False, 'speed': 128, 'color': 128, 'light': 255}]
+		self.state['nebo'] = {'address': 0x50, 'mode': 0, 'speed': 19, 'other': [0,0,0,0]}
+		self.state['neboModes'] = [u'Ugasnjeno', u'Normalno', u'Ozvezdja', u'Enakomerno', u'Utripanje posamezno', u'Utripanje več']
 		self.turnOff(None)
 		
 	def getState(self):
@@ -91,3 +96,19 @@ class Jaslice:
 		self.state['fires'][fid]['color'] = int(parameters['color'][0])
 		if USE_SMBUS:
 			self.bus.write_byte_data(self.state['fires'][fid]['address'], 2, self.state['fires'][fid]['color'])
+
+	def neboMode(self, parameters):
+		self.state['nebo']['mode'] = int(parameters['mode'][0])
+		if USE_SMBUS:
+			self.bus.write_byte_data(self.state['nebo']['address'], 0, self.state['nebo']['mode'])
+	
+	def neboSpeed(self, parameters):
+		self.state['nebo']['speed'] = int(parameters['speed'][0])
+		if USE_SMBUS:
+			self.bus.write_byte_data(self.state['nebo']['address'], 1, self.state['nebo']['speed'])
+	
+	def neboOther(self, parameters):
+		oid = int(parameters['id'][0])
+		self.state['nebo']['other'][oid] = int(parameters['other'][0])
+		if USE_SMBUS:
+			self.bus.write_byte_data(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
