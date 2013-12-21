@@ -64,6 +64,13 @@
 				<input type="hidden" name="id" value="0" />
 				<input type="submit" value="Nastavi osvetlitev" />
 			</form></p>
+
+			<h2>Voda</h2>
+			<p><form action="/act/nebo-other" method="get">
+				Osvetlitev: <input type="number" name="other" min="0" max="255" value="{{ nebo['other'][1] }}" />
+				<input type="hidden" name="id" value="1" />
+				<input type="submit" value="Nastavi osvetlitev" />
+			</form></p>
 			
 		</div>
 	{% else %}
