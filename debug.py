@@ -12,7 +12,7 @@ import os, sys
 
 PORT = 80
 
+SocketServer.TCPServer.allow_reuse_address = True
 httpd = SocketServer.TCPServer(("", PORT), handler.Handler)
-httpd.allow_reuse_address = True
 print "serving at port", PORT
 httpd.serve_forever()
