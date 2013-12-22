@@ -57,7 +57,8 @@ class Jaslice:
 		self.scheduleUtrinek()
 	
 	def scheduleUtrinek(self):
-		signal.alarm(random.randint(self.state['utrinek']['min'], self.state['utrinek-max']['max']))
+		if self.state['utrinek']['random']:
+			signal.alarm(random.randint(self.state['utrinek']['min'], self.state['utrinek']['max']))
 	
 	def getState(self):
 		return self.state
@@ -107,8 +108,7 @@ class Jaslice:
 			if self.state['nebo']['other'][oid] != 0:
 				time.sleep(0.1)
 				self.bus.write_byte_data(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
-		if self.state['utrinek']['random']:
-			self.scheduleUtrinek()
+		self.scheduleUtrinek()
 	
 	def turnOn(self, parameters):
 		if USE_GPIO:
@@ -176,6 +176,8 @@ class Jaslice:
 			self.bus.write_byte(self.state['utrinek']['address'], 0)
 			
 	def utrinekMinMax(self, parameters):
+		signal.alarm(0)
 		self.state['utrinek']['min'] = int(parameters['min'][0])
 		self.state['utrinek']['max'] = int(parameters['max'][0])
 		self.state['utrinek']['random'] = bool(int(parameters['random'][0]))
+		self.scheduleUtrinek()
