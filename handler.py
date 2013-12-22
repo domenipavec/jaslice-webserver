@@ -48,7 +48,4 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 			self.wfile.write(text)
 
 	def handleAction(self, action, parameters):
-		try:
-			jaslice.act(action, parameters)
-		except:
-			print "Action does not exist."
+		jaslice.act(action, parameters)

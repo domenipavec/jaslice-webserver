@@ -54,7 +54,10 @@ class Jaslice:
 		return self.state
 
 	def act(self, action, parameters):
-		return self.acts[action](parameters)
+		if action not in self.acts:
+			print "Action does not exist."
+		else:
+			return self.acts[action](parameters)
 		
 	def saveDefaults(self, parameters):
 		f = open(self.cfn, "wb")
