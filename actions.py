@@ -5,7 +5,7 @@
 #  
 #  Copyright 2013 Domen Ipavec <domen.ipavec@z-v.si>
 
-import pickle
+import pickle,time
 try:
 	import RPi.GPIO as GPIO
 	USE_GPIO = True
@@ -81,21 +81,28 @@ class Jaslice:
 		for fire in self.state['fires']:
 			if fire['power']:
 				self.bus.write_byte(fire['address'], 1)
+				time.sleep(0.1)
 			self.bus.write_byte_data(fire['address'], 4, fire['speed'])
+			time.sleep(0.1)
 			self.bus.write_byte_data(fire['address'], 3, fire['light'])
+			time.sleep(0.1)
 			self.bus.write_byte_data(fire['address'], 2, fire['color'])
+			time.sleep(0.1)
 		# nebo
 		if self.state['nebo']['mode'] != 0:
 			self.bus.write_byte_data(self.state['nebo']['address'], 0, self.state['nebo']['mode'])
+		time.sleep(0.1)
 		self.bus.write_byte_data(self.state['nebo']['address'], 1, self.state['nebo']['speed'])
 		for oid in range(4):
 			if self.state['nebo']['other'][oid] != 0:
+				time.sleep(0.1)
 				self.bus.write_byte_data(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
 	
 	def turnOn(self, parameters):
 		if USE_GPIO:
 			GPIO.output(POWER_ON_PIN, GPIO.HIGH)
-			setDefaults()
+			time.sleep(1)
+			self.setDefaults()
 		self.state['power'] = True
 	
 	def turnOff(self, parameters):
