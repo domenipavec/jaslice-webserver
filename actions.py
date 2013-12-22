@@ -23,7 +23,7 @@ POWER_ON_PIN = 12
 
 class Jaslice:
 	
-	def __init__(self):
+	def __init__(self, cfn):
 		if USE_GPIO:
 			GPIO.setmode(GPIO.BOARD)
 			GPIO.setup(POWER_ON_PIN, GPIO.OUT)
@@ -42,14 +42,12 @@ class Jaslice:
 			'nebo-mode': self.neboMode,
 			'nebo-speed': self.neboSpeed,
 			'nebo-other': self.neboOther,
-			'utrinek': self.utrinek
+			'utrinek': self.utrinek,
+			'save-defaults': self.saveDefaults
 		}
 
-		self.state = {}
-		self.state['fires'] = [{'address': 0x60, 'power': False, 'speed': 128, 'color': 128, 'light': 255},
-			{'address': 0x61, 'power': False, 'speed': 128, 'color': 128, 'light': 255}]
-		self.state['nebo'] = {'address': 0x50, 'mode': 0, 'speed': 19, 'other': [0,0,0,0]}
-		self.state['neboModes'] = [u'Ugasnjeno', u'Normalno', u'Ozvezdja', u'Enakomerno', u'Utripanje posamezno', u'Utripanje več']
+		self.cfn = cfn
+			
 		self.turnOff(None)
 		
 	def getState(self):
@@ -57,15 +55,50 @@ class Jaslice:
 
 	def act(self, action, parameters):
 		return self.acts[action](parameters)
+		
+	def saveDefaults(self, parameters):
+		f = open(self.cfn, "wb")
+		pickle.dump(self.state, f)
+		f.close()
+		
+	def loadDefaults(self):
+		try:
+			f = open(self.cfn, "rb")
+			self.state = pickle.load(f)
+			f.close()
+		except:
+			self.state = {}
+			self.state['fires'] = [{'address': 0x60, 'power': False, 'speed': 128, 'color': 128, 'light': 255},
+				{'address': 0x61, 'power': False, 'speed': 128, 'color': 128, 'light': 255}]
+			self.state['nebo'] = {'address': 0x50, 'mode': 0, 'speed': 19, 'other': [0,0,0,0]}
+			self.state['neboModes'] = [u'Ugasnjeno', u'Normalno', u'Ozvezdja', u'Enakomerno', u'Utripanje posamezno', u'Utripanje več']
+	
+	def setDefaults(self):
+		# fires
+		for fire in self.state['fires']:
+			if fire['power']:
+				self.bus.write_byte(fire['address'], 1)
+			self.bus.write_byte_data(fire['address'], 4, fire['speed'])
+			self.bus.write_byte_data(fire['address'], 3, fire['light'])
+			self.bus.write_byte_data(fire['address'], 2, fire['color'])
+		# nebo
+		if self.state['nebo']['mode'] != 0:
+			self.bus.write_byte_data(self.state['nebo']['address'], 0, self.state['nebo']['mode'])
+		self.bus.write_byte_data(self.state['nebo']['address'], 1, self.state['nebo']['speed'])
+		for oid in range(4):
+			if self.state['nebo']['other'][oid] != 0:
+				self.bus.write_byte_data(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
 	
 	def turnOn(self, parameters):
 		if USE_GPIO:
 			GPIO.output(POWER_ON_PIN, GPIO.HIGH)
+			setDefaults()
 		self.state['power'] = True
 	
 	def turnOff(self, parameters):
 		if USE_GPIO:
 			GPIO.output(POWER_ON_PIN, GPIO.LOW)
+		self.loadDefaults()
 		self.state['power'] = False
 	
 	def fireOn(self, parameters):
@@ -73,6 +106,7 @@ class Jaslice:
 		self.state['fires'][fid]['power'] = True
 		if USE_SMBUS:
 			self.bus.write_byte(self.state['fires'][fid]['address'], 1)
+			self.setDefaults()
 
 	def fireOff(self, parameters):
 		fid = int(parameters['id'][0])
