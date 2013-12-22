@@ -5,7 +5,7 @@
 #  
 #  Copyright 2013 Domen Ipavec <domen.ipavec@z-v.si>
 
-import pickle,time
+import pickle,time, signal,random
 try:
 	import RPi.GPIO as GPIO
 	USE_GPIO = True
@@ -30,6 +30,7 @@ class Jaslice:
 
 		if USE_SMBUS:
 			self.bus = smbus.SMBus(1)
+			signal.signal(signal.SIGALRM, self.randomTimeHandler)
 
 		self.acts = {
 			'turn-on': self.turnOn,
@@ -43,6 +44,7 @@ class Jaslice:
 			'nebo-speed': self.neboSpeed,
 			'nebo-other': self.neboOther,
 			'utrinek': self.utrinek,
+			'utrinek-min-max': self.utrinekMinMax,
 			'save-defaults': self.saveDefaults
 		}
 
@@ -50,6 +52,13 @@ class Jaslice:
 			
 		self.turnOff(None)
 		
+	def randomTimeHandler(self, signum, frame):
+		self.utrinek(None)
+		self.scheduleUtrinek()
+	
+	def scheduleUtrinek(self):
+		signal.alarm(random.randint(self.state['utrinek']['min'], self.state['utrinek-max']['max']))
+	
 	def getState(self):
 		return self.state
 
@@ -75,6 +84,7 @@ class Jaslice:
 				{'address': 0x61, 'power': False, 'speed': 128, 'color': 128, 'light': 255}]
 			self.state['nebo'] = {'address': 0x50, 'mode': 0, 'speed': 19, 'other': [0,0,0,0]}
 			self.state['neboModes'] = [u'Ugasnjeno', u'Normalno', u'Ozvezdja', u'Enakomerno', u'Utripanje posamezno', u'Utripanje več']
+			self.state['utrinek'] = {'address': 0x40, 'max': 60, 'min': 10, 'random': False}
 	
 	def setDefaults(self):
 		# fires
@@ -97,6 +107,8 @@ class Jaslice:
 			if self.state['nebo']['other'][oid] != 0:
 				time.sleep(0.1)
 				self.bus.write_byte_data(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
+		if self.state['utrinek']['random']:
+			self.scheduleUtrinek()
 	
 	def turnOn(self, parameters):
 		if USE_GPIO:
@@ -107,6 +119,7 @@ class Jaslice:
 	
 	def turnOff(self, parameters):
 		if USE_GPIO:
+			signal.alarm(0)
 			GPIO.output(POWER_ON_PIN, GPIO.LOW)
 		self.loadDefaults()
 		self.state['power'] = False
@@ -160,4 +173,9 @@ class Jaslice:
 
 	def utrinek(self, parameters):
 		if USE_SMBUS:
-			self.bus.write_byte(0x40, 0)
+			self.bus.write_byte(self.state['utrinek']['address'], 0)
+			
+	def utrinekMinMax(self, parameters):
+		self.state['utrinek']['min'] = int(parameters['min'][0])
+		self.state['utrinek']['max'] = int(parameters['max'][0])
+		self.state['utrinek']['random'] = bool(int(parameters['random'][0]))

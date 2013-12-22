@@ -39,6 +39,22 @@
 			
 			<h2>Utrinek</h2>
 			<p><a href="/act/utrinek">POŽENI</a></p>
+			<p><form action="/act/utrinek-min-max" method="get">
+						Naključno:
+						<select name="random">
+						{% if utrinek['random'] %}
+							<option value="0">NE</option>
+							<option value="1" selected="selected">DA</option>
+						{% else %}
+							<option value="0" selected="selected">NE</option>
+							<option value="1">DA</option>
+						{% endif %}
+						</select><br />
+						Min: <input type="number" name="min" min="1" value="{{ utrinek['min'] }}" />s<br />
+						Max: <input type="number" name="max" min="1" value="{{ utrinek['max'] }}" />s<br />
+						
+					<input type="submit" value="Nastavi" />
+					</form></p>
 			
 			<h2>Nebo</h2>
 			<p><form action="/act/nebo-mode" method="get">
