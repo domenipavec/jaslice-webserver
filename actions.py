@@ -52,6 +52,17 @@ class Jaslice:
 			
 		self.turnOff(None)
 		
+	def tryWrite(self, address, command, value = None):
+		try:
+			if value == None:
+				self.bus.write_byte(address, command)
+			else:
+				self.bus.write_byte_data(address, command, value)
+		except:
+			self.turnOff(None)
+			time.sleep(1)
+			self.turnOn(None)
+		
 	def randomTimeHandler(self, signum, frame):
 		self.utrinek(None)
 		self.scheduleUtrinek()
@@ -91,23 +102,23 @@ class Jaslice:
 		# fires
 		for fire in self.state['fires']:
 			if fire['power']:
-				self.bus.write_byte(fire['address'], 1)
+				self.tryWrite(fire['address'], 1)
 				time.sleep(0.1)
-			self.bus.write_byte_data(fire['address'], 4, fire['speed'])
+			self.tryWrite(fire['address'], 4, fire['speed'])
 			time.sleep(0.1)
-			self.bus.write_byte_data(fire['address'], 3, fire['light'])
+			self.tryWrite(fire['address'], 3, fire['light'])
 			time.sleep(0.1)
-			self.bus.write_byte_data(fire['address'], 2, fire['color'])
+			self.tryWrite(fire['address'], 2, fire['color'])
 			time.sleep(0.1)
 		# nebo
 		if self.state['nebo']['mode'] != 0:
-			self.bus.write_byte_data(self.state['nebo']['address'], 0, self.state['nebo']['mode'])
+			self.tryWrite(self.state['nebo']['address'], 0, self.state['nebo']['mode'])
 		time.sleep(0.1)
-		self.bus.write_byte_data(self.state['nebo']['address'], 1, self.state['nebo']['speed'])
+		self.tryWrite(self.state['nebo']['address'], 1, self.state['nebo']['speed'])
 		for oid in range(4):
 			if self.state['nebo']['other'][oid] != 0:
 				time.sleep(0.1)
-				self.bus.write_byte_data(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
+				self.tryWrite(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
 		self.scheduleUtrinek()
 	
 	def turnOn(self, parameters):
@@ -128,52 +139,52 @@ class Jaslice:
 		fid = int(parameters['id'][0])
 		self.state['fires'][fid]['power'] = True
 		if USE_SMBUS:
-			self.bus.write_byte(self.state['fires'][fid]['address'], 1)
+			self.tryWrite(self.state['fires'][fid]['address'], 1)
 			self.setDefaults()
 
 	def fireOff(self, parameters):
 		fid = int(parameters['id'][0])
 		self.state['fires'][fid]['power'] = False
 		if USE_SMBUS:
-			self.bus.write_byte(self.state['fires'][fid]['address'], 0)
+			self.tryWrite(self.state['fires'][fid]['address'], 0)
 
 	def fireSpeed(self, parameters):
 		fid = int(parameters['id'][0])
 		self.state['fires'][fid]['speed'] = int(parameters['speed'][0])
 		if USE_SMBUS:
-			self.bus.write_byte_data(self.state['fires'][fid]['address'], 4, self.state['fires'][fid]['speed'])
+			self.tryWrite(self.state['fires'][fid]['address'], 4, self.state['fires'][fid]['speed'])
 
 	def fireLight(self, parameters):
 		fid = int(parameters['id'][0])
 		self.state['fires'][fid]['light'] = int(parameters['light'][0])
 		if USE_SMBUS:
-			self.bus.write_byte_data(self.state['fires'][fid]['address'], 3, self.state['fires'][fid]['light'])
+			self.tryWrite(self.state['fires'][fid]['address'], 3, self.state['fires'][fid]['light'])
 
 	def fireColor(self, parameters):
 		fid = int(parameters['id'][0])
 		self.state['fires'][fid]['color'] = int(parameters['color'][0])
 		if USE_SMBUS:
-			self.bus.write_byte_data(self.state['fires'][fid]['address'], 2, self.state['fires'][fid]['color'])
+			self.tryWrite(self.state['fires'][fid]['address'], 2, self.state['fires'][fid]['color'])
 
 	def neboMode(self, parameters):
 		self.state['nebo']['mode'] = int(parameters['mode'][0])
 		if USE_SMBUS:
-			self.bus.write_byte_data(self.state['nebo']['address'], 0, self.state['nebo']['mode'])
+			self.tryWrite(self.state['nebo']['address'], 0, self.state['nebo']['mode'])
 	
 	def neboSpeed(self, parameters):
 		self.state['nebo']['speed'] = int(parameters['speed'][0])
 		if USE_SMBUS:
-			self.bus.write_byte_data(self.state['nebo']['address'], 1, self.state['nebo']['speed'])
+			self.tryWrite(self.state['nebo']['address'], 1, self.state['nebo']['speed'])
 	
 	def neboOther(self, parameters):
 		oid = int(parameters['id'][0])
 		self.state['nebo']['other'][oid] = int(parameters['other'][0])
 		if USE_SMBUS:
-			self.bus.write_byte_data(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
+			self.tryWrite(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
 
 	def utrinek(self, parameters):
 		if USE_SMBUS:
-			self.bus.write_byte(self.state['utrinek']['address'], 0)
+			self.tryWrite(self.state['utrinek']['address'], 0)
 			
 	def utrinekMinMax(self, parameters):
 		signal.alarm(0)
