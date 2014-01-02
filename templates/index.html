@@ -13,6 +13,20 @@
 		<p>Power: <a href="/act/turn-off">UGASNI</a></p>
 		<p><a href="/act/save-defaults">Shrani kot privzeto</a></p>
 		<div>
+			<h2>Voda</h2>
+			{% if relays[0] %}
+				<p><a href="/act/relay-off/?id=0">UGASNI</a></p>
+			{% else %}
+				<p><a href="/act/relay-on/?id=0">PRIŽGI</a></p>
+			{% endif %}
+			
+			<h2>Veliki ogenj</h2>
+			{% if relays[1] %}
+				<p><a href="/act/relay-off/?id=1">UGASNI</a></p>
+			{% else %}
+				<p><a href="/act/relay-on/?id=1">PRIŽGI</a></p>
+			{% endif %}
+			
 			{% for fire in fires %}
 				<h2>Ogenj {{ loop.index }}</h2>
 				{% if fire['power'] %}

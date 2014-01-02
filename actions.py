@@ -45,7 +45,9 @@ class Jaslice:
 			'nebo-other': self.neboOther,
 			'utrinek': self.utrinek,
 			'utrinek-min-max': self.utrinekMinMax,
-			'save-defaults': self.saveDefaults
+			'save-defaults': self.saveDefaults,
+			'relay-on': self.relayOn,
+			'relay-off': self.relayOff
 		}
 
 		self.cfn = cfn
@@ -86,17 +88,21 @@ class Jaslice:
 		f.close()
 		
 	def loadDefaults(self):
+		self.state = {}
+		self.state['fires'] = [{'address': 0x60, 'power': False, 'speed': 128, 'color': 128, 'light': 255},
+			{'address': 0x61, 'power': False, 'speed': 128, 'color': 128, 'light': 255}]
+		self.state['nebo'] = {'address': 0x50, 'mode': 0, 'speed': 19, 'other': [0,0,0,0]}
+		self.state['neboModes'] = [u'Ugasnjeno', u'Normalno', u'Ozvezdja', u'Enakomerno', u'Utripanje posamezno', u'Utripanje več']
+		self.state['utrinek'] = {'address': 0x40, 'max': 60, 'min': 10, 'random': False}
+		self.state['relays'] = [False,False,False,False,False,False,False]
+		self.state['relay-address'] = 0x51
 		try:
 			f = open(self.cfn, "rb")
-			self.state = pickle.load(f)
+			loaded = pickle.load(f)
+			self.state.update(loaded)
 			f.close()
 		except:
-			self.state = {}
-			self.state['fires'] = [{'address': 0x60, 'power': False, 'speed': 128, 'color': 128, 'light': 255},
-				{'address': 0x61, 'power': False, 'speed': 128, 'color': 128, 'light': 255}]
-			self.state['nebo'] = {'address': 0x50, 'mode': 0, 'speed': 19, 'other': [0,0,0,0]}
-			self.state['neboModes'] = [u'Ugasnjeno', u'Normalno', u'Ozvezdja', u'Enakomerno', u'Utripanje posamezno', u'Utripanje več']
-			self.state['utrinek'] = {'address': 0x40, 'max': 60, 'min': 10, 'random': False}
+			pass
 	
 	def setDefaults(self):
 		# fires
@@ -120,6 +126,9 @@ class Jaslice:
 				time.sleep(0.1)
 				self.tryWrite(self.state['nebo']['address'], 2+oid, self.state['nebo']['other'][oid])
 		self.scheduleUtrinek()
+		for i in range(len(self.state['relays'])):
+			if self.state['relays'][i]:
+				self.tryWrite(self.state['relay-address'], 1, i)
 	
 	def turnOn(self, parameters):
 		if USE_GPIO:
@@ -192,3 +201,15 @@ class Jaslice:
 		self.state['utrinek']['max'] = int(parameters['max'][0])
 		self.state['utrinek']['random'] = bool(int(parameters['random'][0]))
 		self.scheduleUtrinek()
+
+	def relayOn(self,parameters):
+		rid = int(parameters['id'][0])
+		self.state['relays'][rid] = True
+		if USE_SMBUS:
+			self.tryWrite(self.state['relay-address'], 1, rid)
+			
+	def relayOff(self,parameters):
+		rid = int(parameters['id'][0])
+		self.state['relays'][rid] = False
+		if USE_SMBUS:
+			self.tryWrite(self.state['relay-address'], 0, rid)
