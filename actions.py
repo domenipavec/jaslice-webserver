@@ -61,9 +61,10 @@ class Jaslice:
 			else:
 				self.bus.write_byte_data(address, command, value)
 		except:
-			self.turnOff(None)
-			time.sleep(1)
-			self.turnOn(None)
+			if self.state['power']:
+				self.turnOff(None)
+				time.sleep(1)
+				self.turnOn(None)
 		
 	def randomTimeHandler(self, signum, frame):
 		self.utrinek(None)
